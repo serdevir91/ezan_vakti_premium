@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.ezanvakti.premium.ezan_vakti_premium"
+    namespace = "com.erdevirlabs.athan_premium"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -21,7 +21,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.ezanvakti.premium.ezan_vakti_premium"
+        applicationId = "com.erdevirlabs.athan_premium"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode

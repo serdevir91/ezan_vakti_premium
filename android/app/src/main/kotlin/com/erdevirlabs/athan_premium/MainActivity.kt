@@ -1,4 +1,4 @@
-package com.ezanvakti.premium.ezan_vakti_premium
+package com.erdevirlabs.athan_premium
 
 import io.flutter.embedding.android.FlutterActivity
 
