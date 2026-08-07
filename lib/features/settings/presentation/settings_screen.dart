@@ -135,7 +135,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          "${l10n.version} 1.0.0+1 • ${locale.languageCode.toUpperCase()}",
+                          "${l10n.version} 1.0.0+2 • ${locale.languageCode.toUpperCase()}",
                           style: TextStyle(
                             color: Colors.white.withValues(alpha: 0.8),
                             fontSize: 12,
@@ -387,7 +387,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ListTile(
                     leading: _buildIconBadge(Icons.system_update, primaryColor),
                     title: Text(l10n.checkUpdates, style: const TextStyle(fontWeight: FontWeight.w600)),
-                    subtitle: const Text("Sürüm 1.0.0+1"),
+                    subtitle: const Text("Sürüm 1.0.0+2"),
                     trailing: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: primaryColor,
