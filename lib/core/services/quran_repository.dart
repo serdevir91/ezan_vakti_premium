@@ -203,22 +203,21 @@ class QuranRepository {
     return list.contains('$surahNumber:$verseNumber');
   }
 
-  /// Fetches Surahs from Local Offline or Live APIs (AlQuran Cloud / Fawaz Ahmed)
+  /// Fetches Surahs with live translations for TR, EN, AR, FA
   Future<List<SurahModel>> getSurahsWithProvider(String localeCode) async {
-    final provider = await getSelectedProvider();
+    // 1. Try AlQuran Cloud API first (complete live translations for TR, EN, AR, FA)
+    try {
+      final cloudSurahs = await _fetchAlQuranCloudSurahs(localeCode);
+      if (cloudSurahs.isNotEmpty) return cloudSurahs;
+    } catch (_) {}
 
-    if (provider == QuranProvider.alQuranCloud) {
-      try {
-        final cloudSurahs = await _fetchAlQuranCloudSurahs(localeCode);
-        if (cloudSurahs.isNotEmpty) return cloudSurahs;
-      } catch (_) {}
-    } else if (provider == QuranProvider.fawazAhmed) {
-      try {
-        final fawazSurahs = await _fetchFawazAhmedSurahs(localeCode);
-        if (fawazSurahs.isNotEmpty) return fawazSurahs;
-      } catch (_) {}
-    }
+    // 2. Try Fawaz Ahmed API
+    try {
+      final fawazSurahs = await _fetchFawazAhmedSurahs(localeCode);
+      if (fawazSurahs.isNotEmpty) return fawazSurahs;
+    } catch (_) {}
 
+    // 3. Fallback to local dataset
     return getSurahs();
   }
 
