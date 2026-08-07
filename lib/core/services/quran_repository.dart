@@ -262,27 +262,61 @@ class QuranRepository {
 
   /// Live Fetch from AlQuran Cloud API (https://api.alquran.cloud/v1)
   Future<List<SurahModel>> _fetchAlQuranCloudSurahs(String localeCode) async {
-    String edition = "tr.yazir";
+    String edition = "tr.diyanet";
     if (localeCode == 'en') edition = "en.sahih";
     if (localeCode == 'fa') edition = "fa.makarem";
+    if (localeCode == 'ar') edition = "quran-uthmani";
 
-    final url = Uri.parse("https://api.alquran.cloud/v1/surah?edition=$edition");
-    final res = await http.get(url).timeout(const Duration(seconds: 5));
+    final url = Uri.parse("https://api.alquran.cloud/v1/quran/$edition");
+    final res = await http.get(url).timeout(const Duration(seconds: 12));
     if (res.statusCode == 200) {
       final json = jsonDecode(res.body);
-      final List list = json['data'];
+      final List list = json['data']['surahs'] ?? [];
       List<SurahModel> result = [];
       for (var item in list) {
         final chNum = item['number'] as int;
+        final List ayahsList = item['ayahs'] ?? [];
+        final localVerses = _getVersesForSurah(chNum);
+
+        final verseModels = ayahsList.map((a) {
+          final vNum = a['numberInSurah'] as int;
+          final text = (a['text'] as String? ?? '').trim();
+          final fallbackV = localVerses.where((lv) => lv.number == vNum).firstOrNull;
+
+          return VerseModel(
+            number: vNum,
+            surahNumber: chNum,
+            arabicText: localeCode == 'ar'
+                ? text
+                : (fallbackV?.arabicText.isNotEmpty == true ? fallbackV!.arabicText : "بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيْمِ"),
+            translationTurkish: localeCode == 'tr' ? text : (fallbackV?.translationTurkish ?? ""),
+            translationEnglish: localeCode == 'en' ? text : (fallbackV?.translationEnglish ?? ""),
+            translationPersian: localeCode == 'fa' ? text : (fallbackV?.translationPersian ?? ""),
+            translationArabic: localeCode == 'ar' ? text : (fallbackV?.translationArabic ?? ""),
+          );
+        }).toList();
+
+        final meta = _allSurahMetadata.firstWhere(
+          (m) => m['number'] == chNum,
+          orElse: () => {
+            'ar': item['name'] ?? '',
+            'tr': item['englishName'] ?? '',
+            'en': item['englishName'] ?? '',
+            'fa': item['name'] ?? '',
+            'translit': item['englishName'] ?? '',
+            'verses': verseModels.length,
+          },
+        );
+
         result.add(SurahModel(
           number: chNum,
-          nameArabic: item['name'] ?? '',
-          nameTurkish: item['englishName'] ?? '',
-          nameEnglish: item['englishName'] ?? '',
-          namePersian: item['name'] ?? '',
-          nameTransliterated: item['englishName'] ?? '',
-          verseCount: item['numberOfAyahs'] ?? 7,
-          verses: _getVersesForSurah(chNum),
+          nameArabic: meta['ar'] as String,
+          nameTurkish: meta['tr'] as String,
+          nameEnglish: meta['en'] as String,
+          namePersian: meta['fa'] as String,
+          nameTransliterated: meta['translit'] as String,
+          verseCount: verseModels.length,
+          verses: verseModels,
         ));
       }
       return result;
